@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/moxfield-collection-converter/',
+  base: process.env.VITE_BASE || '/moxfield-collection-converter/',
   plugins: [tailwindcss(), svelte()],
 });
