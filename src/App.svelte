@@ -45,8 +45,6 @@
     try {
       error = '';
       const result = convertCSV(csvContent);
-      console.log('Conversion result:', result);
-      console.log('CSV content:', csvContent);
       convertedOutput = result;
     } catch (err) {
       console.error('Conversion error:', err);
