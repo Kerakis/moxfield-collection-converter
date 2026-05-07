@@ -136,3 +136,63 @@ export function convertCSV(csvContent: string): string {
 
   return outputLines.join('\n');
 }
+
+// ---------------------------------------------------------------------------
+// Text → CSV conversion
+// ---------------------------------------------------------------------------
+
+function parseFoilMarkerToCSV(marker: string | undefined): string {
+  if (!marker) return '';
+  const m = marker.trim().toUpperCase();
+  if (m === '*E*') return 'etched';
+  if (m === '*F*') return 'foil';
+  return '';
+}
+
+function escapeCSVField(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+export function parseTextLine(line: string): CardRow | null {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+
+  // Format: {Count} {Name} ({Edition}) {CollectorNumber} [*F*|*E*]
+  const match = trimmed.match(
+    /^(\d+)\s+(.+?)\s+\(([^)]+)\)\s+(\S+)(?:\s+(\*[EFef]\*))?$/,
+  );
+  if (!match) return null;
+
+  return {
+    Count: match[1],
+    Name: match[2],
+    Edition: match[3],
+    'Collector Number': match[4],
+    Foil: parseFoilMarkerToCSV(match[5]),
+  };
+}
+
+export function convertTextToCSV(textContent: string): string {
+  const lines = textContent.trim().split(/\r?\n/);
+  const header = 'Count,Name,Edition,Collector Number,Foil';
+  const rows: string[] = [header];
+
+  for (const line of lines) {
+    const row = parseTextLine(line);
+    if (row) {
+      const csvLine = [
+        escapeCSVField(row.Count || ''),
+        escapeCSVField(row.Name || ''),
+        escapeCSVField(row.Edition || ''),
+        escapeCSVField(row['Collector Number'] || ''),
+        escapeCSVField(row.Foil || ''),
+      ].join(',');
+      rows.push(csvLine);
+    }
+  }
+
+  return rows.join('\n');
+}
