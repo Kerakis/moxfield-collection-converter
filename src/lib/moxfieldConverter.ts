@@ -157,7 +157,8 @@ function escapeCSVField(value: string): string {
 }
 
 export function parseTextLine(line: string): CardRow | null {
-  const trimmed = line.trim();
+  // Strip user tags (#Tag, #!Tag) — Moxfield deck exports append them, no card name has a '#'
+  const trimmed = line.replace(/\s+#.*$/, '').trim();
   if (!trimmed) return null;
 
   // Format: {Count} {Name} ({Edition}) {CollectorNumber} [*F*|*E*]
